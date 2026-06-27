@@ -17,7 +17,7 @@ pipeline {
 
         stage('BUILD STAGE') {
             steps {
-                dir('cdec-b29-master/backend') {
+                dir('backend') {
                     sh 'java -version'
                     sh 'javac -version'
                     sh 'mvn -version'
@@ -30,7 +30,7 @@ pipeline {
         stage('TEST STAGE') {
             steps {
                 withSonarQubeEnv('sonarqube') {
-                    dir('cdec-b29-master/backend') {
+                    dir('backend') {
                         sh '''
                             mvn sonar:sonar \
                             -Dsonar.projectKey=cloudblitz \
