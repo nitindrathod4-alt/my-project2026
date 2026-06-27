@@ -1,25 +1,59 @@
 pipeline {
     agent any
+
+    environment {
+        JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+    }
+
     stages {
-        stage ('PULL STAGE') {
+
+        stage('PULL STAGE') {
             steps {
-	        git 'https://github.com/chetanraval07/cdec-b29.git'
-                echo 'Pull Success'
+                git 'https://github.com/nitindrathod4-alt/my-project2026.git'
+                echo 'PULL SUCCESS'
             }
         }
-        stage ('BUILD STAGE') {
+
+        stage('BUILD STAGE') {
             steps {
-                echo 'Build Success'
+                dir('cdec-b29-master/backend') {
+                    sh 'java -version'
+                    sh 'javac -version'
+                    sh 'mvn -version'
+                    sh 'mvn clean package -DskipTests'
+                }
+                echo 'BUILD SUCCESS'
             }
         }
-        stage ('TEST STAGE') {
+
+        stage('TEST STAGE') {
             steps {
-                echo 'Test Success'
+                withSonarQubeEnv('sonarqube') {
+                    dir('cdec-b29-master/backend') {
+                        sh '''
+                            mvn sonar:sonar \
+                            -Dsonar.projectKey=cloudblitz \
+                            -Dsonar.projectName=cloudblitz
+                        '''
+                    }
+                }
+                echo 'SONAR SCAN SUCCESS'
             }
         }
-        stage ('DEPLOY STAGE') {
+
+        stage('QUALITY GATE') {
             steps {
-                echo 'Deploy Success'
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+                echo 'QUALITY GATE PASSED'
+            }
+        }
+
+        stage('DEPLOY stage') {
+            steps {
+                echo 'DEPLOY SUCCESS'
             }
         }
     }
