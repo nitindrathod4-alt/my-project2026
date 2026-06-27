@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+    stages {
+        stage ('PULL STAGE') {
+            steps {
+	        git 'https://github.com/chetanraval07/cdec-b29.git'
+                echo 'Pull Success'
+            }
+        }
+        stage ('BUILD STAGE') {
+            steps {
+                echo 'Build Success'
+            }
+        }
+        stage ('TEST STAGE') {
+            steps {
+                echo 'Test Success'
+            }
+        }
+        stage ('DEPLOY STAGE') {
+            steps {
+                echo 'Deploy Success'
+            }
+        }
+    }
+}
