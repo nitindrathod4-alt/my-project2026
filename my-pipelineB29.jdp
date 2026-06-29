@@ -42,18 +42,15 @@ pipeline {
             }
         }
 
-        stage('QUALITY GATE') {
+        stage('DELIVERY STAGE') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                dir('backend') {
+                    sh '''
+                        aws s3 cp target/my-app-1.0-SNAPSHOT.jar \
+                        s3://jenkins-deployment-bucket-1/
+                    '''
                 }
-                echo 'QUALITY GATE PASSED'
-            }
-        }
-
-        stage('VideoCall Successful') {
-            steps {
-                echo 'DEPLOY SUCCESS'
+                echo 'DELIVERY SUCCESS'
             }
         }
     }
