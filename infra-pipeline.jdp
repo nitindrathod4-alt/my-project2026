@@ -5,7 +5,8 @@ pipeline {
 
         stage('PULL STAGE') {
             steps {
-                git 'https://github.com/nitindrathod4-alt/my-project2026.git'
+                git branch: 'main',
+                    url: 'https://github.com/nitindrathod4-alt/my-project2026.git'
             }
         }
 
@@ -13,7 +14,8 @@ pipeline {
             steps {
                 sh '''
                 terraform init -reconfigure
-                terraform plan
+                terraform validate
+                terraform plan -out=tfplan
                 '''
             }
         }
@@ -30,10 +32,20 @@ pipeline {
         stage('TERRAFORM APPLY') {
             steps {
                 sh '''
-                terraform apply -auto-approve
+                terraform apply -auto-approve tfplan
                 '''
             }
         }
 
+    }
+
+    post {
+        success {
+            echo 'Terraform deployment successful.'
+        }
+
+        failure {
+            echo 'Terraform deployment failed.'
+        }
     }
 }
