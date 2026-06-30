@@ -18,6 +18,9 @@ pipeline {
         stage('BUILD STAGE') {
             steps {
                 dir('backend') {
+                    sh 'java -version'
+                    sh 'javac -version'
+                    sh 'mvn -version'
                     sh 'mvn clean compile'
                 }
                 echo 'BUILD SUCCESS'
@@ -49,6 +52,7 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
+                echo 'QUALITY GATE PASSED'
             }
         }
 
@@ -65,12 +69,14 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                    aws s3 cp target/student-registration-backend-0.0.1-SNAPSHOT.jar \
-                    s3://jenkins-deployment-bucket-1/
+                        aws s3 cp \
+                        target/student-registration-backend-0.0.1-SNAPSHOT.jar \
+                        s3://jenkins-deployment-bucket-1/
                     '''
-                 echo 'DELIVERY SUCCESS'
-
-               }
+                }
+                echo 'DELIVERY SUCCESS'
             }
         }
-     }	
+
+    }
+}
