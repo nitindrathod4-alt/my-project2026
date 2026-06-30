@@ -18,12 +18,46 @@ pipeline {
         stage('BUILD STAGE') {
             steps {
                 dir('backend') {
-                    sh 'java -version'
-                    sh 'javac -version'
-                    sh 'mvn -version'
-                    sh 'mvn clean package -DskipTests'
+                    sh 'mvn clean compile'
                 }
                 echo 'BUILD SUCCESS'
+            }
+        }
+
+        stage('TEST STAGE') {
+            steps {
+                dir('backend') {
+                    sh 'mvn test'
+                }
+                echo 'TEST SUCCESS'
+            }
+        }
+
+        stage('SONARQUBE ANALYSIS') {
+            steps {
+                dir('backend') {
+                    withSonarQubeEnv('sonarqube') {
+                        sh 'mvn sonar:sonar'
+                    }
+                }
+                echo 'SONARQUBE SUCCESS'
+            }
+        }
+
+        stage('QUALITY GATE') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('PACKAGE STAGE') {
+            steps {
+                dir('backend') {
+                    sh 'mvn package -DskipTests'
+                }
+                echo 'PACKAGE SUCCESS'
             }
         }
 
@@ -31,12 +65,12 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                        aws s3 cp target/student-registration-backend-0.0.1-SNAPSHOT.jar \
-                        s3://jenkins-deployment-bucket-1/
+                    aws s3 cp target/student-registration-backend-0.0.1-SNAPSHOT.jar \
+                    s3://jenkins-deployment-bucket-1/
                     '''
-                }
-                echo 'DELIVERY SUCCESS'
+                 echo 'DELIVERY SUCCESS'
+
+               }
             }
         }
-    }
-}
+     }	
