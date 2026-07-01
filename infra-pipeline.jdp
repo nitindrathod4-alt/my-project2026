@@ -3,6 +3,12 @@ pipeline {
 
     stages {
 
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
         stage('Checkout') {
             steps {
                 git 'https://github.com/nitindrathod4-alt/my-project2026.git'
@@ -12,20 +18,28 @@ pipeline {
         stage('Build') {
             steps {
                 dir('backend') {
-                    sh 'mvn clean package -DskipTests'
+                    sh '''
+                    mvn clean package -DskipTests
+                    '''
                 }
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh 'terraform init -reconfigure'
+                sh '''
+                rm -rf .terraform
+                terraform init -reconfigure
+                '''
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan'
+                sh '''
+                aws sts get-caller-identity
+                terraform plan
+                '''
             }
         }
 
@@ -40,6 +54,5 @@ pipeline {
                 sh 'terraform apply -auto-approve'
             }
         }
-
     }
 }
